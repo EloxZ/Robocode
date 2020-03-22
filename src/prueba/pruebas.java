@@ -3,7 +3,7 @@ package prueba;
 public class pruebas {
 
 	public static void main(String[] args) {
-		long seed = 20;
+		long seed = 0;
 		int nFil = 16;
 		int nCol = 12;
 		int nObst = 40;

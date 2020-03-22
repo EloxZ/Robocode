@@ -57,6 +57,12 @@ public class RouteFinder {
 		Problema problema = new Problema(semilla, nFil, nCol, numObstaculos);
 
 	    char[][] mapa = problema.getMatriz();
+		for (int co = nCol-1; co>=0; co--) {
+			for  (int fi = 0; fi<nFil; fi++) {
+				System.out.print(mapa[fi][co] + " ");
+			}
+			System.out.println();
+		}
 	    int inicialX = problema.getiX();
 	    int inicialY = problema.getiY();
 	    int finalX = problema.getfX();
@@ -78,10 +84,10 @@ public class RouteFinder {
 				new BattlefieldSpecification(numPixelFila, numPixelCol);
 		// Establecer parámetros de la batalla
 		int numberOfRounds = 5;
-		long inactivityTime = 10000000;
+		long inactivityTime = 10000;
 		double gunCoolingRate = 1.0;
 		int sentryBorderSize = 50;
-		boolean hideEnemyNames = false;
+		boolean hideEnemyNames = true;
 
 
 
@@ -110,8 +116,8 @@ public class RouteFinder {
 		existingRobots[indice]=modelRobots[1];
 
 
-		robotSetups[indice]=new RobotSetup( (double)  inicialX * tamCelda       ,        //AQUÍ DEBE FIGURAR LA FILA EN PIXELS CORRESPONDIENTE A LA POSICIÓN INICIAL DEL ROBOT
-				                               (double)   inicialY * tamCelda  ,        //AQUÍ DEBE FIGURAR LA COLUMNA EN PIXELS CORRESPONDIENTE A LA POSICIÓN INICIAL DEL ROBOT
+		robotSetups[indice]=new RobotSetup( (double)  (inicialX+1) * tamCelda - (tamCelda / 2)      ,        //AQUÍ DEBE FIGURAR LA FILA EN PIXELS CORRESPONDIENTE A LA POSICIÓN INICIAL DEL ROBOT
+				                               (double)   (inicialY+1) * tamCelda - (tamCelda / 2),        //AQUÍ DEBE FIGURAR LA COLUMNA EN PIXELS CORRESPONDIENTE A LA POSICIÓN INICIAL DEL ROBOT
 										   0.0);              //orientación inicial
 
 
@@ -119,16 +125,6 @@ public class RouteFinder {
 	     * Creamos un robot sittingDuck por cada obstáculo, y lo colocamos en el centro de la
 	     * celda correspondiente.
 		 */
-
-
-
-		//AQUÍ SE DEBERÍA CREAR UN ROBOT sittingDuck EN LA POSICIÓN DE CADA OBSTÁCULO DE LA MALLA.
-		//
-		//
-		//  ...
-		//
-		//
-
 
 
 		indice++;
@@ -139,8 +135,8 @@ public class RouteFinder {
 					existingRobots[indice]=modelRobots[0];   //sittingDuck
 
 
-					robotSetups[indice]=  new RobotSetup( f * tamCelda ,   //AQUÍ DEBE FIGURAR LA FILA EN PIXELS CORRESPONDIENTE AL CENTRO DE LA CELDA DONDE HAY OBSTÁCULO
-							                          c * tamCelda    ,   //AQUÍ DEBE FIGURAR LA FILA EN PIXELS CORRESPONDIENTE AL CENTRO DE LA COLUMNA DONDE HAY OBSTÁCULO
+					robotSetups[indice]=  new RobotSetup( (double) (f+1) * tamCelda - (tamCelda / 2) ,   //AQUÍ DEBE FIGURAR LA FILA EN PIXELS CORRESPONDIENTE AL CENTRO DE LA CELDA DONDE HAY OBSTÁCULO
+							(double) (c+1) * tamCelda  - (tamCelda / 2)  ,   //AQUÍ DEBE FIGURAR LA FILA EN PIXELS CORRESPONDIENTE AL CENTRO DE LA COLUMNA DONDE HAY OBSTÁCULO
 							                             0.0);    //orientación
 					indice++;
 
