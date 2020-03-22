@@ -1,5 +1,4 @@
 package prueba;
-import java.util.*;
 
 public class pruebas {
 
