@@ -74,11 +74,11 @@ public class RouteFinder {
 
 		// Crear el RobocodeEngine desde una instalación en C:/Robocode
 		RobocodeEngine engine =
-				new RobocodeEngine(new java.io.File("C:/Robocode"));
+				new RobocodeEngine(new java.io.File("C:/robocode"));
 		// Mostrar el simulador de Robocode
 		engine.setVisible(true);
 
-
+	
 
 		BattlefieldSpecification battlefield =
 				new BattlefieldSpecification(numPixelFila, numPixelCol);
@@ -161,7 +161,6 @@ public class RouteFinder {
 						hideEnemyNames,
 						existingRobots,
 						robotSetups);
-
 
 		// Ejecutar la simulación el tiempo especificado
 		engine.runBattle(battleSpec, true);
