@@ -6,6 +6,7 @@ import static robocode.util.Utils.normalRelativeAngleDegrees;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Stack;
 import java.util.ArrayList;
 
 import robocode.AdvancedRobot;
@@ -14,48 +15,44 @@ import robocode.util.*;
 
 
 /**
- * 
+ *
  */
 
 /**
  * @date 2018-03-22
- * 
- * Plantilla para la definición de un robot en Robocode
+ *
+ * Plantilla para la definiciï¿½n de un robot en Robocode
  *
  */
 public class Bot3 extends AdvancedRobot {
-	
-	private void goTo(double x, double y) {
-		/* Transform our coordinates into a vector */
-		x -= getX();
-		y -= getY();
-	 
-		/* Calculate the angle to the target position */
-		double angleToTarget = Math.atan2(x, y);
-	 
-		/* Calculate the turn required get there */
-		double targetAngle = Utils.normalRelativeAngle(angleToTarget - getHeadingRadians());
-	 
-		/* 
-		 * The Java Hypot method is a quick way of getting the length
-		 * of a vector. Which in this case is also the distance between
-		 * our robot and the target location.
-		 */
-		double distance = Math.hypot(x, y);
-	 
-		/* This is a simple method of performing set front as back */
-		double turnAngle = Math.atan(Math.tan(targetAngle));
-		setTurnRightRadians(turnAngle);
-		if(targetAngle == turnAngle) {
-			setAhead(distance);
-		} else {
-			setBack(distance);
-		}
+
+	private void go(double x, double y) {
+	    /* Calculate the difference bettwen the current position and the target position. */
+	    x = x - getX();
+	    y = y - getY();
+
+	    /* Calculate the angle relative to the current heading. */
+	    double goAngle = Utils.normalRelativeAngle(Math.atan2(x, y) - getHeadingRadians());
+
+	    /*
+	     * Apply a tangent to the turn this is a cheap way of achieving back to front turn angle as tangents period is PI.
+	     * The output is very close to doing it correctly under most inputs. Applying the arctan will reverse the function
+	     * back into a normal value, correcting the value. The arctan is not needed if code size is required, the error from
+	     * tangent evening out over multiple turns.
+	     */
+	    turnRightRadians(Math.atan(Math.tan(goAngle)));
+
+	    /*
+	     * The cosine call reduces the amount moved more the more perpendicular it is to the desired angle of travel. The
+	     * hypot is a quick way of calculating the distance to move as it calculates the length of the given coordinates
+	     * from 0.
+	     */
+	    ahead(Math.cos(goAngle) * Math.hypot(x, y));
 	}
 
-	private void busquedaAnchura(Problema p, int tamCelda) {
-		LinkedList<Estado> camino = new LinkedList<Estado>();
-		
+	private Stack<Estado> busquedaAnchura(Problema p, int tamCelda) {
+		Stack<Estado> camino = new Stack<Estado>();
+
 		HashMap<Estado,Info> tree = new HashMap<Estado,Info>();
 		LinkedList<Info> abiertos = new LinkedList<>();
 		Info s = new Info(null,new Estado(p.getiX(),p.getiY()));
@@ -81,54 +78,60 @@ public class Bot3 extends AdvancedRobot {
 				}
 			}
 		}
-		
+
 		if (encontrado) {
 			do {
-				camino.add(nodo.getEstado());
+				camino.push(nodo.getEstado());
 				nodo = nodo.getPadre();
 			} while (nodo != null);
-			for (Estado e : camino) {
-				goTo((double)  (e.getX()+1) * tamCelda - (tamCelda / 2), (double)  (e.getY()+1) * tamCelda - (tamCelda / 2));
-			}
-		} 
+			camino.pop();
+		}
+		return camino;
 	}
 
 	//The main method in every robot
 	public void run() {
-		
 
-		System.out.println("Iniciando ejecución del robot");
-		
-		// Nuestro robot será rojo
+
+		System.out.println("Iniciando ejecuciï¿½n del robot");
+
+		// Nuestro robot serï¿½ rojo
 		setAllColors(Color.red);
 
 		//DATOS QUE DEBEN COINCIDIR CON LOS DEL PROGRAMA main DE LA CLASE RouteFinder
-		long semilla = 0;
+		long semilla = 5;
 		int nFil = 16;
 		int nCol = 12;
 		int nObst = 40;
 		int tamCelda = 50;
-		
+
 		//Orientamos inicialmente el robot hacia arriba
 		turnRight(normalRelativeAngleDegrees(0 - getHeading()));
 		
 		//A continuación nuestro robot girará un poco sobre sí mismo		
 		int k = 0;
-		while(k < 20){
+		while(k < 5){
 			turnRight(90);
 			k++;
 		}
-		
-		// AQUÍ DEBE:
-		//  1. GENERARSE EL PROBLEMA DE BÚSQUEDA
+
+
+		// AQUï¿½ DEBE:
+		//  1. GENERARSE EL PROBLEMA DE Bï¿½SQUEDA
 		Problema p = new Problema(semilla, nFil, nCol, nObst);
 		Estado.setProblema(p);
-		
-		//  2. BUSCAR LA SOLUCIÓN CON UN ALGORITMO DE BÚSQUEDA
-		busquedaAnchura(p, tamCelda);
-		//  3. EJECUTAR LA SOLUCIÓN ENCONTRADA
-			
+
+		//  2. BUSCAR LA SOLUCIï¿½N CON UN ALGORITMO DE Bï¿½SQUEDA
+		Stack<Estado> camino = busquedaAnchura(p, tamCelda);
+		//  3. EJECUTAR LA SOLUCIï¿½N ENCONTRADA
+		while (true) {
+			if (!camino.isEmpty()) {
+				Estado estado = camino.pop();
+				go((double) (estado.getX() + 1) * tamCelda - tamCelda / 2,(double) (estado.getY() + 1) * tamCelda - tamCelda / 2);
+			} 
+		}
+
 	}
-	
-	
+
+
 }

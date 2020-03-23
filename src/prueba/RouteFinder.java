@@ -1,8 +1,13 @@
 package prueba;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Random;
 
+import busqueda.Estado;
+import busqueda.Info;
 import robocode.control.BattleSpecification;
 import robocode.control.BattlefieldSpecification;
 import robocode.control.RobocodeEngine;
@@ -39,7 +44,7 @@ public class RouteFinder {
 
 		//semilla para el generador de números aleatorios
 		//DEBERÁ COINCIDIR CON EL VALOR PROPORCIONADO AL ROBOT
-		long semilla = 0;
+		long semilla = 5;
 
 		//tamaño del mapa de obstáculos
 		//DEBERÁ COINCIDIR CON EL VALOR PROPORCIONADO AL ROBOT
@@ -55,7 +60,7 @@ public class RouteFinder {
 		//
 		//
 		Problema problema = new Problema(semilla, nFil, nCol, numObstaculos);
-
+	    
 	    char[][] mapa = problema.getMatriz();
 		for (int co = nCol-1; co>=0; co--) {
 			for  (int fi = 0; fi<nFil; fi++) {

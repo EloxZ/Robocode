@@ -81,6 +81,6 @@ public class Estado {
 	}
 	
 	public int hashCode() {
-		return mapa.hashCode() + finalX + finalY + x + y;
+		return finalX + finalY + x + y;
 	}
 }
