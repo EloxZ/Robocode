@@ -1,5 +1,6 @@
 package prueba;
 import busqueda.*;
+
 import static robocode.util.Utils.normalRelativeAngleDegrees;
 
 
@@ -8,6 +9,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Stack;
 import java.util.ArrayList;
+import java.util.PriorityQueue;
+import java.util.Comparator;
 
 import robocode.AdvancedRobot;
 import robocode.Robot;
@@ -63,6 +66,51 @@ public class Bot3 extends AdvancedRobot {
 		while (!abiertos.isEmpty() && !encontrado) {
 			nodo = abiertos.getFirst();
 			abiertos.removeFirst();
+			if (nodo.getEstado().finalp()) {
+				encontrado = true;
+			} else {
+				ArrayList<Estado> ramificar = nodo.getEstado().sucesores();
+				if (!ramificar.isEmpty()) {
+					for (Estado x : ramificar) {
+						if (!tree.containsKey(x)) {
+							Info newNodo = new Info(nodo,x);
+							tree.put(x,newNodo);
+							abiertos.add(newNodo);
+						}
+					}
+				}
+			}
+		}
+
+		if (encontrado) {
+			do {
+				camino.push(nodo.getEstado());
+				nodo = nodo.getPadre();
+			} while (nodo != null);
+			camino.pop();
+		}
+		return camino;
+	}
+	public class ComparadorEstado implements Comparator<Info> {
+
+	    public int compare(Info arg0, Info arg1) {
+	    	return arg0.getEstado().coste(arg0.getPadre().getEstado()) - arg1.getEstado().coste(arg1.getPadre().getEstado());
+	    }
+	    
+	}
+	
+	private Stack<Estado> busquedaVoraz(Problema p, int tamCelda) {
+		Stack<Estado> camino = new Stack<Estado>();
+
+		HashMap<Estado,Info> tree = new HashMap<Estado,Info>();
+		PriorityQueue<Info> abiertos = new PriorityQueue<>(new ComparadorEstado());
+		Info s = new Info(null,new Estado(p.getiX(),p.getiY()));
+		tree.put(s.getEstado(),s);
+		abiertos.add(s);
+		Info nodo = null;
+		boolean encontrado = false;
+		while (!abiertos.isEmpty() && !encontrado) {
+			nodo = abiertos.remove();
 			if (nodo.getEstado().finalp()) {
 				encontrado = true;
 			} else {

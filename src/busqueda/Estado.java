@@ -56,6 +56,20 @@ public class Estado {
 		return sucesores;
 	}
 	
+	public int coste(Estado e2) //suponiendo siempre que ningun estado sea barrera ni que no sean adyacentes
+	{
+		int c = 1000;
+		if ((x == e2.x && y!=e2.y) ||(y == e2.y && x!=e2.x))
+		{
+			c = 100;
+		}
+		if (x != e2.x && y != e2.y)
+		{
+			c = 141;
+		}
+		return c;
+	}
+	
 	public int getX() {
 		return x;
 	}

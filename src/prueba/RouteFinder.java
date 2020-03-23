@@ -2,12 +2,16 @@ package prueba;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.Random;
+import java.util.Stack;
 
 import busqueda.Estado;
 import busqueda.Info;
+import prueba.Bot3.ComparadorEstado;
 import robocode.control.BattleSpecification;
 import robocode.control.BattlefieldSpecification;
 import robocode.control.RobocodeEngine;
@@ -25,7 +29,57 @@ import robocode.control.RobotSpecification;
  *
  */
 
+
 public class RouteFinder {
+	
+	
+	
+	private Stack<Estado> busquedaVoraz(Problema p, int tamCelda) {
+		public class ComparadorEstado implements Comparator<Info> {
+
+		    public int compare(Info arg0, Info arg1) {
+		    	return arg0.getEstado().coste(arg0.getPadre().getEstado()) - arg1.getEstado().coste(arg1.getPadre().getEstado());
+		    }
+		    
+		}
+		Stack<Estado> camino = new Stack<Estado>();
+
+		HashMap<Estado,Info> tree = new HashMap<Estado,Info>();
+		PriorityQueue<Info> abiertos = new PriorityQueue<>(new ComparadorEstado());
+		Info s = new Info(null,new Estado(p.getiX(),p.getiY()));
+		tree.put(s.getEstado(),s);
+		abiertos.add(s);
+		Info nodo = null;
+		boolean encontrado = false;
+		while (!abiertos.isEmpty() && !encontrado) {
+			nodo = abiertos.remove();
+			if (nodo.getEstado().finalp()) {
+				encontrado = true;
+			} else {
+				ArrayList<Estado> ramificar = nodo.getEstado().sucesores();
+				if (!ramificar.isEmpty()) {
+					for (Estado x : ramificar) {
+						if (!tree.containsKey(x)) {
+							Info newNodo = new Info(nodo,x);
+							tree.put(x,newNodo);
+							abiertos.add(newNodo);
+						}
+					}
+				}
+			}
+		}
+
+		if (encontrado) {
+			do {
+				camino.push(nodo.getEstado());
+				nodo = nodo.getPadre();
+			} while (nodo != null);
+			camino.pop();
+		}
+		return camino;
+		
+		
+	}
 
 	public static void main(String[] args) {
 
@@ -60,6 +114,7 @@ public class RouteFinder {
 		//
 		//
 		Problema problema = new Problema(semilla, nFil, nCol, numObstaculos);
+		
 	    
 	    char[][] mapa = problema.getMatriz();
 		for (int co = nCol-1; co>=0; co--) {
@@ -150,6 +205,12 @@ public class RouteFinder {
 		}//for f
 
 		System.out.println("Generados " + (indice -1) + " sitting ducks.");
+		
+		Stack<Estado> camino = busquedaVoraz(problema, tamCelda);
+		for(Estado x : camino)
+		{
+			System.out.println(camino.toString());
+		}
 
 
 
@@ -173,6 +234,7 @@ public class RouteFinder {
 		engine.close();
 		// Asegurarse de que la MV de Java se cierra adecuadamente.
 		System.exit(0);
+		
 
 
 	}
