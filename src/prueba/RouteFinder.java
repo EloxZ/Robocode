@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.Stack;
 
 import busqueda.Estado;
 import busqueda.Info;
@@ -40,11 +41,11 @@ public class RouteFinder {
 
 		//número de obstáculos
 		////DEBERÁ COINCIDIR CON EL VALOR PROPORCIONADO AL ROBOT
-		int numObstaculos = 40;
+		int numObstaculos = 60;
 
 		//semilla para el generador de números aleatorios
 		//DEBERÁ COINCIDIR CON EL VALOR PROPORCIONADO AL ROBOT
-		long semilla = 5;
+		long semilla = 69;
 
 		//tamaño del mapa de obstáculos
 		//DEBERÁ COINCIDIR CON EL VALOR PROPORCIONADO AL ROBOT
@@ -60,7 +61,7 @@ public class RouteFinder {
 		//
 		//
 		Problema problema = new Problema(semilla, nFil, nCol, numObstaculos);
-	    
+
 	    char[][] mapa = problema.getMatriz();
 		for (int co = nCol-1; co>=0; co--) {
 			for  (int fi = 0; fi<nFil; fi++) {

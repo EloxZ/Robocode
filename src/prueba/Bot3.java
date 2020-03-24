@@ -6,8 +6,10 @@ import static robocode.util.Utils.normalRelativeAngleDegrees;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.Stack;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 import robocode.AdvancedRobot;
 import robocode.Robot;
@@ -40,7 +42,7 @@ public class Bot3 extends AdvancedRobot {
 	     * back into a normal value, correcting the value. The arctan is not needed if code size is required, the error from
 	     * tangent evening out over multiple turns.
 	     */
-	    turnRightRadians(Math.atan(Math.tan(goAngle)));
+	    if (this.getVelocity() < 0.1) turnRightRadians(Math.atan(Math.tan(goAngle)));
 
 	    /*
 	     * The cosine call reduces the amount moved more the more perpendicular it is to the desired angle of travel. The
@@ -49,6 +51,7 @@ public class Bot3 extends AdvancedRobot {
 	     */
 	    ahead(Math.cos(goAngle) * Math.hypot(x, y));
 	}
+	
 
 	private Stack<Estado> busquedaAnchura(Problema p, int tamCelda) {
 		Stack<Estado> camino = new Stack<Estado>();
@@ -88,21 +91,69 @@ public class Bot3 extends AdvancedRobot {
 		}
 		return camino;
 	}
+	
+	public class ComparadorEstado implements Comparator<Info> {
+
+	    public int compare(Info arg0, Info arg1) {
+	    	return arg0.getEstado().coste(arg0.getPadre().getEstado()) - arg1.getEstado().coste(arg1.getPadre().getEstado());
+	    }
+	    
+	}
+	
+	public Stack<Estado> busquedaVoraz(Problema p, int tamCelda) {
+		Stack<Estado> camino = new Stack<Estado>();
+
+		HashMap<Estado,Info> tree = new HashMap<Estado,Info>();
+		PriorityQueue<Info> abiertos = new PriorityQueue<>(new ComparadorEstado());
+		Info s = new Info(null,new Estado(p.getiX(),p.getiY()));
+		tree.put(s.getEstado(),s);
+		abiertos.add(s);
+		Info nodo = null;
+		boolean encontrado = false;
+		while (!abiertos.isEmpty() && !encontrado) {
+			nodo = abiertos.remove();
+	
+			if (nodo.getEstado().finalp()) {
+				encontrado = true;
+			} else {
+				ArrayList<Estado> ramificar = nodo.getEstado().sucesores();
+				if (!ramificar.isEmpty()) {
+					for (Estado x : ramificar) {
+						if (!tree.containsKey(x)) {
+							Info newNodo = new Info(nodo,x);
+							tree.put(x,newNodo);
+							abiertos.add(newNodo);
+						}
+					}
+				}
+			}
+		}
+
+		if (encontrado) {
+			do {
+				camino.push(nodo.getEstado());
+				nodo = nodo.getPadre();
+			} while (nodo != null);
+			camino.pop();
+		}
+		return camino;
+	}
+
 
 	//The main method in every robot
 	public void run() {
 
 
-		System.out.println("Iniciando ejecuci�n del robot");
+		System.out.println("Iniciando ejecucion del robot");
 
 		// Nuestro robot ser� rojo
 		setAllColors(Color.red);
 
 		//DATOS QUE DEBEN COINCIDIR CON LOS DEL PROGRAMA main DE LA CLASE RouteFinder
-		long semilla = 5;
+		long semilla = 69;
 		int nFil = 16;
 		int nCol = 12;
-		int nObst = 40;
+		int nObst = 60;
 		int tamCelda = 50;
 
 		//Orientamos inicialmente el robot hacia arriba
@@ -123,10 +174,14 @@ public class Bot3 extends AdvancedRobot {
 
 		//  2. BUSCAR LA SOLUCI�N CON UN ALGORITMO DE B�SQUEDA
 		Stack<Estado> camino = busquedaAnchura(p, tamCelda);
+		//Stack<Estado> camino = busquedaVoraz(p, tamCelda);
 		//  3. EJECUTAR LA SOLUCI�N ENCONTRADA
+		Estado estado = null;
 		while (true) {
-			if (!camino.isEmpty()) {
-				Estado estado = camino.pop();
+			if (!camino.isEmpty() && this.getVelocity() == 0) {
+				estado = camino.pop();
+				go((double) (estado.getX() + 1) * tamCelda - tamCelda / 2,(double) (estado.getY() + 1) * tamCelda - tamCelda / 2);
+			} else if (estado != null) {
 				go((double) (estado.getX() + 1) * tamCelda - tamCelda / 2,(double) (estado.getY() + 1) * tamCelda - tamCelda / 2);
 			} 
 		}
