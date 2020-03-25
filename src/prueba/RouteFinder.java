@@ -41,11 +41,11 @@ public class RouteFinder {
 
 		//número de obstáculos
 		////DEBERÁ COINCIDIR CON EL VALOR PROPORCIONADO AL ROBOT
-		int numObstaculos = 60;
+		int numObstaculos = 40;
 
 		//semilla para el generador de números aleatorios
 		//DEBERÁ COINCIDIR CON EL VALOR PROPORCIONADO AL ROBOT
-		long semilla = 69;
+		long semilla = 323;
 
 		//tamaño del mapa de obstáculos
 		//DEBERÁ COINCIDIR CON EL VALOR PROPORCIONADO AL ROBOT

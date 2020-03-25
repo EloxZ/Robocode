@@ -29,33 +29,20 @@ import robocode.util.*;
 public class Bot3 extends AdvancedRobot {
 
 	private void go(double x, double y) {
-	    /* Calculate the difference bettwen the current position and the target position. */
 	    x = x - getX();
 	    y = y - getY();
 
-	    /* Calculate the angle relative to the current heading. */
 	    double goAngle = Utils.normalRelativeAngle(Math.atan2(x, y) - getHeadingRadians());
 
-	    /*
-	     * Apply a tangent to the turn this is a cheap way of achieving back to front turn angle as tangents period is PI.
-	     * The output is very close to doing it correctly under most inputs. Applying the arctan will reverse the function
-	     * back into a normal value, correcting the value. The arctan is not needed if code size is required, the error from
-	     * tangent evening out over multiple turns.
-	     */
 	    if (this.getVelocity() < 0.1) turnRightRadians(Math.atan(Math.tan(goAngle)));
 
-	    /*
-	     * The cosine call reduces the amount moved more the more perpendicular it is to the desired angle of travel. The
-	     * hypot is a quick way of calculating the distance to move as it calculates the length of the given coordinates
-	     * from 0.
-	     */
 	    ahead(Math.cos(goAngle) * Math.hypot(x, y));
 	}
 	
 
 	private Stack<Estado> busquedaAnchura(Problema p, int tamCelda) {
 		Stack<Estado> camino = new Stack<Estado>();
-
+		int k = 0;
 		HashMap<Estado,Info> tree = new HashMap<Estado,Info>();
 		LinkedList<Info> abiertos = new LinkedList<>();
 		Info s = new Info(null,new Estado(p.getiX(),p.getiY()));
@@ -70,6 +57,7 @@ public class Bot3 extends AdvancedRobot {
 				encontrado = true;
 			} else {
 				ArrayList<Estado> ramificar = nodo.getEstado().sucesores();
+				k++;
 				if (!ramificar.isEmpty()) {
 					for (Estado x : ramificar) {
 						if (!tree.containsKey(x)) {
@@ -89,6 +77,7 @@ public class Bot3 extends AdvancedRobot {
 			} while (nodo != null);
 			camino.pop();
 		}
+		System.out.println("Busqueda por anchura: " + k + " nodos seleccionados para expansion.");
 		return camino;
 	}
 	
@@ -102,6 +91,7 @@ public class Bot3 extends AdvancedRobot {
 	
 	public Stack<Estado> busquedaVoraz(Problema p, int tamCelda) {
 		Stack<Estado> camino = new Stack<Estado>();
+		int k = 0;
 
 		HashMap<Estado,Info> tree = new HashMap<Estado,Info>();
 		PriorityQueue<Info> abiertos = new PriorityQueue<>(new ComparadorEstado());
@@ -117,6 +107,7 @@ public class Bot3 extends AdvancedRobot {
 				encontrado = true;
 			} else {
 				ArrayList<Estado> ramificar = nodo.getEstado().sucesores();
+				k++;
 				if (!ramificar.isEmpty()) {
 					for (Estado x : ramificar) {
 						if (!tree.containsKey(x)) {
@@ -136,6 +127,7 @@ public class Bot3 extends AdvancedRobot {
 			} while (nodo != null);
 			camino.pop();
 		}
+		System.out.println("Busqueda voraz: " + k + " nodos seleccionados para expansion.");
 		return camino;
 	}
 
@@ -150,10 +142,10 @@ public class Bot3 extends AdvancedRobot {
 		setAllColors(Color.red);
 
 		//DATOS QUE DEBEN COINCIDIR CON LOS DEL PROGRAMA main DE LA CLASE RouteFinder
-		long semilla = 69;
+		long semilla = 323;
 		int nFil = 16;
 		int nCol = 12;
-		int nObst = 60;
+		int nObst = 40;
 		int tamCelda = 50;
 
 		//Orientamos inicialmente el robot hacia arriba
@@ -171,19 +163,36 @@ public class Bot3 extends AdvancedRobot {
 		//  1. GENERARSE EL PROBLEMA DE Bï¿½SQUEDA
 		Problema p = new Problema(semilla, nFil, nCol, nObst);
 		Estado.setProblema(p);
+		
+		char[][] mapa = p.getMatriz();
+		
+		System.out.println("/------------------------------/");
+		for (int co = nCol-1; co>=0; co--) {
+			for  (int fi = 0; fi<nFil; fi++) {
+				System.out.print(mapa[fi][co] + " ");
+			}
+			System.out.println();
+		}
+		System.out.println("/------------------------------/");
 
 		//  2. BUSCAR LA SOLUCIï¿½N CON UN ALGORITMO DE Bï¿½SQUEDA
 		Stack<Estado> camino = busquedaAnchura(p, tamCelda);
 		//Stack<Estado> camino = busquedaVoraz(p, tamCelda);
 		//  3. EJECUTAR LA SOLUCIï¿½N ENCONTRADA
 		Estado estado = null;
-		while (true) {
+		boolean running = true;
+		while (running) {
 			if (!camino.isEmpty() && this.getVelocity() == 0) {
 				estado = camino.pop();
+				System.out.println(estado.toString());
 				go((double) (estado.getX() + 1) * tamCelda - tamCelda / 2,(double) (estado.getY() + 1) * tamCelda - tamCelda / 2);
 			} else if (estado != null) {
 				go((double) (estado.getX() + 1) * tamCelda - tamCelda / 2,(double) (estado.getY() + 1) * tamCelda - tamCelda / 2);
+				if (camino.isEmpty() && this.getVelocity() == 0) {System.out.println("¡Completado!"); running = false;}
 			} 
+		}
+		while (true) {
+			doNothing();
 		}
 
 	}
