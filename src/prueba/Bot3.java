@@ -40,7 +40,7 @@ public class Bot3 extends AdvancedRobot {
 	}
 	
 
-	private Stack<Estado> busquedaAnchura(Problema p, int tamCelda) {
+	private Stack<Estado> busquedaAnchura(Problema p) {
 		Stack<Estado> camino = new Stack<Estado>();
 		int k = 0;
 		HashMap<Estado,Info> tree = new HashMap<Estado,Info>();
@@ -82,14 +82,58 @@ public class Bot3 extends AdvancedRobot {
 	}
 	
 	public class ComparadorEstado implements Comparator<Info> {
-
 	    public int compare(Info arg0, Info arg1) {
 	    	return arg0.getEstado().coste(arg0.getPadre().getEstado()) - arg1.getEstado().coste(arg1.getPadre().getEstado());
 	    }
-	    
 	}
 	
-	public Stack<Estado> busquedaVoraz(Problema p, int tamCelda) {
+	public class ComparadorEstadoAestrella implements Comparator<Info> {
+        public int compare(Info arg0, Info arg1) {
+            return (arg0.getEstado().f() - arg1.getEstado().f());
+        }
+    }
+	
+	public Stack<Estado> busquedaAestrella(Problema p) {
+        Stack<Estado> camino = new Stack<Estado>();
+        int k = 0;
+        HashMap<Estado,Info> tree = new HashMap<Estado,Info>();
+        PriorityQueue<Info> abiertos = new PriorityQueue<>(new ComparadorEstadoAestrella());
+        Info s = new Info(null,new Estado(p.getiX(),p.getiY()));
+        tree.put(s.getEstado(),s);
+        abiertos.add(s);
+        Info nodo = null;
+        boolean encontrado = false;
+        while (!abiertos.isEmpty() && !encontrado) {
+            nodo = abiertos.remove();
+            if (nodo.getEstado().finalp()) {
+                encontrado = true;
+            } else {
+                ArrayList<Estado> ramificar = nodo.getEstado().sucesores();
+                k++;
+                if (!ramificar.isEmpty()) {
+                    for (Estado x : ramificar) {
+                        if (!tree.containsKey(x)) {
+                        	x.addCoste(x.coste(nodo.getEstado()));
+                            Info newNodo = new Info(nodo,x);
+                            tree.put(x,newNodo);
+                            abiertos.add(newNodo);
+                        }
+                    }
+                }
+            }
+        }
+        if (encontrado) {
+            do {
+                camino.push(nodo.getEstado());
+                nodo = nodo.getPadre();
+            } while (nodo != null);
+            camino.pop();
+        }
+        System.out.println("Busqueda A*: " + k + " nodos seleccionados para expansion.");
+        return camino;
+    }
+	
+	public Stack<Estado> busquedaVoraz(Problema p) {
 		Stack<Estado> camino = new Stack<Estado>();
 		int k = 0;
 
@@ -151,7 +195,7 @@ public class Bot3 extends AdvancedRobot {
 		//Orientamos inicialmente el robot hacia arriba
 		turnRight(normalRelativeAngleDegrees(0 - getHeading()));
 		
-		//A continuación nuestro robot girará un poco sobre sí mismo		
+		//A continuaciï¿½n nuestro robot girarï¿½ un poco sobre sï¿½ mismo		
 		int k = 0;
 		while(k < 5){
 			turnRight(90);
@@ -176,8 +220,9 @@ public class Bot3 extends AdvancedRobot {
 		System.out.println("/------------------------------/");
 
 		//  2. BUSCAR LA SOLUCIï¿½N CON UN ALGORITMO DE Bï¿½SQUEDA
-		Stack<Estado> camino = busquedaAnchura(p, tamCelda);
-		//Stack<Estado> camino = busquedaVoraz(p, tamCelda);
+		//Stack<Estado> camino = busquedaAnchura(p);
+		//Stack<Estado> camino = busquedaVoraz(p);
+		Stack<Estado> camino = busquedaAestrella(p);
 		//  3. EJECUTAR LA SOLUCIï¿½N ENCONTRADA
 		Estado estado = null;
 		boolean running = true;
@@ -188,7 +233,7 @@ public class Bot3 extends AdvancedRobot {
 				go((double) (estado.getX() + 1) * tamCelda - tamCelda / 2,(double) (estado.getY() + 1) * tamCelda - tamCelda / 2);
 			} else if (estado != null) {
 				go((double) (estado.getX() + 1) * tamCelda - tamCelda / 2,(double) (estado.getY() + 1) * tamCelda - tamCelda / 2);
-				if (camino.isEmpty() && this.getVelocity() == 0) {System.out.println("¡Completado!"); running = false;}
+				if (camino.isEmpty() && this.getVelocity() == 0) {System.out.println("Completado!"); running = false;}
 			} 
 		}
 		while (true) {

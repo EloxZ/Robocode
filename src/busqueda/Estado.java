@@ -7,10 +7,12 @@ public class Estado {
 	private static char[][] mapa;
 	private static int finalX, finalY;
 	private int x, y;
+	private int coste;
 	
 	public Estado(int fi, int co) {
 		x = fi;
 		y = co;
+		coste = 0;
 	}
 	
 	public static void setProblema(Problema p) {
@@ -56,6 +58,13 @@ public class Estado {
 		return sucesores;
 	}
 	
+	public int calculoHeuristico() {
+		int min = Math.min(Math.abs(x-finalX), Math.abs(y-finalY));
+		int max = Math.max(Math.abs(x-finalX), Math.abs(y-finalY));
+        int res = (142 * min) + 100 * (max-min);
+        return res;
+    }
+	
 	public int coste(Estado e2) //suponiendo siempre que ningun estado sea barrera ni que no sean adyacentes
 	{
 		int c = 1000;
@@ -67,6 +76,10 @@ public class Estado {
 			}
 		}
 		return c;
+	}
+	
+	public int getCoste() {
+		return coste;
 	}
 	
 	public int getX() {
@@ -95,5 +108,13 @@ public class Estado {
 	
 	public int hashCode() {
 		return finalX + finalY + x + y;
+	}
+	
+	public void addCoste(int s) {
+		coste += s;
+	}
+
+	public int f() {
+		return coste + calculoHeuristico();
 	}
 }
